@@ -2,9 +2,12 @@ const express = require('express');
 const authHelper = require('./helper');
 const getUserModel = require('./authModel');
 const getDbConnection = require('./db');
+const getCustomerModel=require('./customer-registerModel')
 const JWT = require('jsonwebtoken');
 const router = express.Router();
 const getHotelModel = require('./model');
+const getFoodModel=require('./food-itemRegister')
+const getRoomModel =require('./room-registerModel')
 
 router.post('/register', async (req, res) => {
     try {
@@ -88,29 +91,83 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.post('/data', async (req, res) => {
+router.post('/roomRegister', async (req, res) => {
     const { customerId, data } = req.body;
 
     try {
         const connection = await getDbConnection(customerId);
-        const Hotel = getHotelModel(connection);
+        const Room = getRoomModel(connection);
 
-        const newHotelData = new Hotel(data);
-        await newHotelData.save();
+        const newRoomData = new Room(data);
+        await newRoomData.save();
 
-        res.status(201).json(newHotelData);
+        res.status(201).json(newRoomData);
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
     }
 });
-router.get('/getAlldata', async (req, res) => {
-    const { customerId } = req.body;
+router.post('/foodRegister', async (req, res) => {
+    const { customerId, data } = req.body;
+
     try {
         const connection = await getDbConnection(customerId);
-        const Hotel = getHotelModel(connection);
-        const hotel = await Hotel.find();
-        res.status(200).json(hotel);
+        const Food = getFoodModel(connection);
+
+        const newFoodData = new Food(data);
+        await newFoodData.save();
+
+        res.status(201).json(newFoodData);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+router.post('/customer', async (req, res) => {
+    const { customerId, data } = req.body;
+
+    try {
+        const connection = await getDbConnection(customerId);
+        const Customer = getCustomerModel(connection);
+
+        const newCustomerData = new Customer(data);
+        await newCustomerData.save();
+
+        res.status(201).json(newCustomerData);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+router.get('/getCustomerdata/:customerId', async (req, res) => {
+    const { customerId } = req.params;
+    try {
+        const connection = await getDbConnection(customerId);
+        const Customer = getCustomerModel(connection);
+        const customer = await Customer.find();
+        res.status(200).json(customer);
+    }catch{
+        res.status(500).json({ error: error.message });
+    }
+})
+router.get('/getRoomdata/:customerId', async (req, res) => {
+    const { customerId } = req.params;
+    try {
+        const connection = await getDbConnection(customerId);
+        const Room = getRoomModel(connection);
+        const room = await Room.find();
+        res.status(200).json(room);
+    }catch{
+        res.status(500).json({ error: error.message });
+    }
+})
+router.get('/getFooddata/:customerId', async (req, res) => {
+    const { customerId } = req.params;
+    try {
+        const connection = await getDbConnection(customerId);
+        const Food = getFoodModel(connection);
+        const food = await Food.find();
+        res.status(200).json(food);
     }catch{
         res.status(500).json({ error: error.message });
     }
