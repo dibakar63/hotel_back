@@ -44,7 +44,9 @@ const roomRegisterSchema=new Schema({
     floorImage:{
         type:String,
         required:true
-    }
+    },
+    availability: { type: Boolean,default:true  }
+
 })
 module.exports = (connection) => {
     return connection.model('Room', roomRegisterSchema);

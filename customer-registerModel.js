@@ -47,12 +47,22 @@ const customerModel=new Schema({
         required:true
     },
     checkIn:{
-        type:String,
+       
+        type:Date,
+    default:Date.now,
+    get: function(date) {
+        // Format date as dd-mm-yy
+        return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+      },
         required:true
     },
     checkOut:{
-        type:String,
-        required:true
+        type:Date,
+        default:Date.now,
+        get: function(date) {
+            // Format date as dd-mm-yy
+            return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+          }
     },
     total:{
         type:Number,

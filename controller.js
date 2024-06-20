@@ -8,6 +8,8 @@ const router = express.Router();
 const getHotelModel = require('./model');
 const getFoodModel=require('./food-itemRegister')
 const getRoomModel =require('./room-registerModel')
+const getFoodBillModel =require('./foodBilling');
+const getRoomBillModel=require('./roomBilling')
 
 router.post('/register', async (req, res) => {
     try {
@@ -101,12 +103,36 @@ router.post('/roomRegister', async (req, res) => {
         const newRoomData = new Room(data);
         await newRoomData.save();
 
-        res.status(201).json(newRoomData);
+        res.status(201).json({message:"Room registered successfully"});
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
     }
 });
+router.delete('/roomRegister/:roomId', async (req, res) => {
+    const { customerId } = req.body;
+    const { roomId } = req.params;
+
+    try {
+        const connection = await getDbConnection(customerId);
+        const Room = getRoomModel(connection);
+
+        // Check if room exists
+        const existingRoom = await Room.findById(roomId);
+        if (!existingRoom) {
+            return res.status(404).json({ error: 'Room not found' });
+        }
+
+        // Delete the room
+        await Room.findByIdAndDelete(roomId);
+
+        res.status(200).json({ message: 'Room deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 router.post('/foodRegister', async (req, res) => {
     const { customerId, data } = req.body;
 
@@ -117,7 +143,23 @@ router.post('/foodRegister', async (req, res) => {
         const newFoodData = new Food(data);
         await newFoodData.save();
 
-        res.status(201).json(newFoodData);
+        res.status(201).json({message:"Food Registered SuccessFully",newFoodData});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+router.post('/foodBillRegister', async (req, res) => {
+    const { customerId, data } = req.body;
+
+    try {
+        const connection = await getDbConnection(customerId);
+        const FoodBill = getFoodBillModel(connection);
+
+        const newFoodBillData = new FoodBill(data);
+        await newFoodBillData.save();
+
+        res.status(201).json({message:"Food Bill Registered SuccessFully",newFoodBillData});
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
@@ -133,7 +175,7 @@ router.post('/customer', async (req, res) => {
         const newCustomerData = new Customer(data);
         await newCustomerData.save();
 
-        res.status(201).json(newCustomerData);
+        res.status(201).json({message:"Customer Added Successfully",newCustomerData});
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
@@ -146,7 +188,7 @@ router.get('/getCustomerdata/:customerId', async (req, res) => {
         const Customer = getCustomerModel(connection);
         const customer = await Customer.find();
         res.status(200).json(customer);
-    }catch{
+    }catch(error){
         res.status(500).json({ error: error.message });
     }
 })
@@ -157,10 +199,58 @@ router.get('/getRoomdata/:customerId', async (req, res) => {
         const Room = getRoomModel(connection);
         const room = await Room.find();
         res.status(200).json(room);
-    }catch{
+    }catch(error){
         res.status(500).json({ error: error.message });
     }
 })
+router.put('/updateAvailability/:customerId/:roomId',async(req,res)=>{
+    const {customerId}=req.params;
+    const {roomId}=req.params;
+    try{
+        const connection=await getDbConnection(customerId);
+        const Room=getRoomModel(connection);
+        const room=await Room.findById(roomId);
+        if (!room) {
+            return res.status(404).json({ error: 'Room not found' });
+          }
+          room.availability=!room.availability;
+          await room.save();
+          res.status(200).json({ message: 'Room availability updated successfully', room });
+        
+    }catch(error){
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+})
+router.post('/roomBill',async(req,res)=>{
+    const { customerId, data } = req.body;
+
+    try {
+        const connection = await getDbConnection(customerId);
+        const RoomBill = getRoomBillModel(connection);
+
+        const NewRoomBill = new RoomBill(data);
+        await NewRoomBill.save();
+
+        res.status(201).json({message:"Room Bill Added SuccessFully",NewRoomBill});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+})
+
+router.get('/getRoomBillData/:customerId', async (req, res) => {
+    const { customerId } = req.params;
+    try {
+        const connection = await getDbConnection(customerId);
+        const RoomBill = getRoomBillModel(connection);
+        const roomBill = await RoomBill.find();
+        res.status(200).json(roomBill);
+    }catch(error){
+        res.status(500).json({ error: error.message });
+    }
+})
+
 router.get('/getFooddata/:customerId', async (req, res) => {
     const { customerId } = req.params;
     try {
@@ -168,7 +258,18 @@ router.get('/getFooddata/:customerId', async (req, res) => {
         const Food = getFoodModel(connection);
         const food = await Food.find();
         res.status(200).json(food);
-    }catch{
+    }catch(error){
+        res.status(500).json({ error: error.message });
+    }
+})
+router.get('/getFoodbilldata/:customerId', async (req, res) => {
+    const { customerId } = req.params;
+    try {
+        const connection = await getDbConnection(customerId);
+        const Food = getFoodBillModel(connection);
+        const food = await Food.find();
+        res.status(200).json(food);
+    }catch(error){
         res.status(500).json({ error: error.message });
     }
 })

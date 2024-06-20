@@ -6,7 +6,7 @@ const registerRoutes = require('./controller');
 const cors=require('cors');
 dotenv.config();
 const app = express();
-const port = 3000;
+const port = 5000;
 
 // Middleware
 app.use(cors());
