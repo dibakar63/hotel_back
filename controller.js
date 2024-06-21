@@ -9,8 +9,10 @@ const getHotelModel = require('./model');
 const getFoodModel=require('./food-itemRegister')
 const getRoomModel =require('./room-registerModel')
 const getFoodBillModel =require('./foodBilling');
-const getRoomBillModel=require('./roomBilling')
-
+const getRoomBillModel=require('./roomBilling');
+const getCashModel=require('./cashRecipt');
+const { connection } = require('mongoose');
+///register and login routes
 router.post('/register', async (req, res) => {
     try {
         const { customerId, hotelName, password } = req.body;
@@ -93,6 +95,8 @@ router.post('/login', async (req, res) => {
     }
 });
 
+
+/////room routes
 router.post('/roomRegister', async (req, res) => {
     const { customerId, data } = req.body;
 
@@ -133,65 +137,6 @@ router.delete('/roomRegister/:roomId', async (req, res) => {
     }
 });
 
-router.post('/foodRegister', async (req, res) => {
-    const { customerId, data } = req.body;
-
-    try {
-        const connection = await getDbConnection(customerId);
-        const Food = getFoodModel(connection);
-
-        const newFoodData = new Food(data);
-        await newFoodData.save();
-
-        res.status(201).json({message:"Food Registered SuccessFully",newFoodData});
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: error.message });
-    }
-});
-router.post('/foodBillRegister', async (req, res) => {
-    const { customerId, data } = req.body;
-
-    try {
-        const connection = await getDbConnection(customerId);
-        const FoodBill = getFoodBillModel(connection);
-
-        const newFoodBillData = new FoodBill(data);
-        await newFoodBillData.save();
-
-        res.status(201).json({message:"Food Bill Registered SuccessFully",newFoodBillData});
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: error.message });
-    }
-});
-router.post('/customer', async (req, res) => {
-    const { customerId, data } = req.body;
-
-    try {
-        const connection = await getDbConnection(customerId);
-        const Customer = getCustomerModel(connection);
-
-        const newCustomerData = new Customer(data);
-        await newCustomerData.save();
-
-        res.status(201).json({message:"Customer Added Successfully",newCustomerData});
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: error.message });
-    }
-});
-router.get('/getCustomerdata/:customerId', async (req, res) => {
-    const { customerId } = req.params;
-    try {
-        const connection = await getDbConnection(customerId);
-        const Customer = getCustomerModel(connection);
-        const customer = await Customer.find();
-        res.status(200).json(customer);
-    }catch(error){
-        res.status(500).json({ error: error.message });
-    }
-})
 router.get('/getRoomdata/:customerId', async (req, res) => {
     const { customerId } = req.params;
     try {
@@ -251,6 +196,40 @@ router.get('/getRoomBillData/:customerId', async (req, res) => {
     }
 })
 
+///food routes
+
+router.post('/foodRegister', async (req, res) => {
+    const { customerId, data } = req.body;
+
+    try {
+        const connection = await getDbConnection(customerId);
+        const Food = getFoodModel(connection);
+
+        const newFoodData = new Food(data);
+        await newFoodData.save();
+
+        res.status(201).json({message:"Food Registered SuccessFully",newFoodData});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+router.post('/foodBillRegister', async (req, res) => {
+    const { customerId, data } = req.body;
+
+    try {
+        const connection = await getDbConnection(customerId);
+        const FoodBill = getFoodBillModel(connection);
+
+        const newFoodBillData = new FoodBill(data);
+        await newFoodBillData.save();
+
+        res.status(201).json({message:"Food Bill Registered SuccessFully",newFoodBillData});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
 router.get('/getFooddata/:customerId', async (req, res) => {
     const { customerId } = req.params;
     try {
@@ -273,5 +252,63 @@ router.get('/getFoodbilldata/:customerId', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 })
+
+/////customer routes
+router.post('/customer', async (req, res) => {
+    const { customerId, data } = req.body;
+
+    try {
+        const connection = await getDbConnection(customerId);
+        const Customer = getCustomerModel(connection);
+
+        const newCustomerData = new Customer(data);
+        await newCustomerData.save();
+
+        res.status(201).json({message:"Customer Added Successfully",newCustomerData});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+router.get('/getCustomerdata/:customerId', async (req, res) => {
+    const { customerId } = req.params;
+    try {
+        const connection = await getDbConnection(customerId);
+        const Customer = getCustomerModel(connection);
+        const customer = await Customer.find();
+        res.status(200).json(customer);
+    }catch(error){
+        res.status(500).json({ error: error.message });
+    }
+})
+
+router.post('/cashRecipt',async(req,res)=>{
+    const {customerId,data}=req.body;
+    try{
+        const connection=await getDbConnection(customerId);
+        const Customer=getCashModel(connection);
+        const cashData=new Customer(data);
+        await cashData.save();
+        res.status(201).json({message:"Cash Recieved Successfully",cashData})
+    }catch(error){
+        res.status(500).json({message:"Cash Not Received"})
+    }
+
+})
+router.get('/getCashRecipt/:customerId',async(req,res)=>{
+    const {customerId}=req.params;
+    try{
+        const connection=await getDbConnection(customerId);
+        const Data=getCashModel(connection);
+        const data=await Data.find();
+        res.status(200).json(data)
+
+    }catch(error){
+        console.log(error)
+
+    }
+})
+
+
 
 module.exports = router;
