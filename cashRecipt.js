@@ -16,6 +16,10 @@ const cashReciptSchema=new Schema({
         type:String,
         required:true
     },
+    mode:{
+        type:String,
+        requird:true
+    },
 
     cash:{
         type:Number,
